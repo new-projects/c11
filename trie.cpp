@@ -86,3 +86,5 @@ int main() {
 	}
 	return 0;
 }
+
+// trie2
