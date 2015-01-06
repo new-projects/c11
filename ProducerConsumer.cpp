@@ -15,7 +15,7 @@ private:
     int* buffer_;
     int front_;
     int rear_;
-    std::mutex lock;
+    std::mutex lock_;
     std::condition_variable notFull_;
     std::condition_variable notEmpty_;
 
@@ -30,7 +30,7 @@ public:
     }
 
     void add(int id, int data) {
-        std::unique_lock<std::mutex> l(lock);
+        std::unique_lock<std::mutex> l(lock_);
         notFull_.wait(l, [this]() { return size_ < capacity_; });
         buffer_[rear_] = data;
         rear_ = (rear_ + 1) % capacity_;
@@ -40,7 +40,7 @@ public:
     }
 
     int get(int id) {
-        std::unique_lock<std::mutex> l(lock);
+        std::unique_lock<std::mutex> l(lock_);
         notEmpty_.wait(l, [this]() { return size_ > 0; });
         int data = buffer_[front_];
         front_ = (front_ + 1) % capacity_;
