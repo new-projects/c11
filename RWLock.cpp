@@ -58,8 +58,10 @@ void reader(int id) {
     rwLock.readLock();
     int i = rand() % buffer.size();
     int data = buffer[i];
-    lock_guard<mutex> lock(outputLock);
-    cout << "reader " << id << " reads buffer[" << i << "] = " << data << endl;
+    {
+        lock_guard<mutex> lock(outputLock);
+        cout << "reader " << id << " reads buffer[" << i << "] = " << data << endl;
+    }
     rwLock.readUnLock();
 }
 
@@ -68,8 +70,10 @@ void writer(int id) {
     int i = rand() % buffer.size();
     int data = rand();
     buffer[i] = data;
-    lock_guard<mutex> lock(outputLock);
-    cout << "writer " << id << " writes buffer[" << i << "] = " << data << endl;
+    {
+        lock_guard<mutex> lock(outputLock);
+        cout << "writer " << id << " writes buffer[" << i << "] = " << data << endl;
+    }
     rwLock.writeUnLock();
 }
 
