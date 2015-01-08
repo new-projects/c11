@@ -14,13 +14,13 @@ private:
     int readerCount_;
     mutex resourceLock_;
     mutex readerCountLock_;
-    mutex priorityLock_;
+    mutex enterLock_;
 
 public:
     RWLock() : readerCount_(0) {}
 
     void readLock() {
-        lock_guard<mutex> pl(priorityLock_);
+        lock_guard<mutex> pl(enterLock_);
         {
             lock_guard<mutex> l(readerCountLock_);
             if (readerCount_ == 0) {
@@ -39,13 +39,13 @@ public:
     }
 
     void writeLock() {
-        priorityLock_.lock();
+        enterLock_.lock();
         resourceLock_.lock();
     }
 
     void writeUnLock() {
         resourceLock_.unlock();
-        priorityLock_.unlock();
+        enterLock_.unlock();
     }
 };
 

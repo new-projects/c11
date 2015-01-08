@@ -17,7 +17,7 @@ private:
     int readerCount_;
     mutex resourceLock_; // lock for the resource
     mutex readerCountLock_; // lock for the readerCount
-    mutex writerLock_;
+    mutex entryLock_;
 
 public:
     RWLock() : readerCount_(0) {}
@@ -39,13 +39,13 @@ public:
     }
 
     void writeLock() {
-        writerLock_.lock();
+        entryLock_.lock();
         resourceLock_.lock();
     }
 
     void writeUnLock() {
         resourceLock_.unlock();
-        writerLock_.unlock();
+        entryLock_.unlock();
     }
 };
 
