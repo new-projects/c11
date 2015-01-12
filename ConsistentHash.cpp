@@ -46,13 +46,13 @@ public:
 
 const int kNumShards = 10;
 const int kNumVirtutalNodes = 1000;
-const int kNumKeys = 100000 * 4;
+const int kNumKeys = 1000000;
 
 int main() {
-  ConsistentHash<int, int> ch(kNumShards, kNumVirtutalNodes);
+  ConsistentHash<int, int> consistentHash(kNumShards, kNumVirtutalNodes);
   vector<int> cnt(kNumShards, 0);
   for (int i = 0; i < kNumKeys; ++i) {
-    cnt[ch.getShardID(rand())]++;
+    cnt[consistentHash.getShardID(rand())]++;
   }
   for (int i = 0; i < kNumShards; ++i) {
     cout << cnt[i] << endl;
