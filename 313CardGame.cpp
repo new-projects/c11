@@ -11,7 +11,7 @@ int calc(int n) {
   for (int i = 0; i < n; ++i) {
     a.push_back(i);
   }
-  
+
   int cnt = 0;
   while (true) {
     for (int i = 0; i < n; ++i) {
@@ -26,15 +26,11 @@ int calc(int n) {
     }
     ++cnt;
     bool done = true;
-//    cout << "b.size() = " << b.size() << endl;
     for (int i = 0; i < n; ++i) {
       if (b[i] != i) {
         done = false;
-        //break;
       }
-  //    cout << b[i] << " ";
     }
-//    cout << endl;
     if (done) {
       break;
     }
@@ -43,15 +39,9 @@ int calc(int n) {
   return cnt;
 }
 
-int gcd(int a, int b) {
-  return b == 0 ? a : gcd(b, a % b);
-}
+int gcd(int a, int b) { return b == 0 ? a : gcd(b, a % b); }
 
-int lcm(int a, int b) {
-  int gd = gcd(a, b);
-//  cout << "gcd( " << a << "," << b << ") = " << gd << endl;
-  return a * b / gcd(a, b);
-}
+int lcm(int a, int b) { return a * b / gcd(a, b); }
 
 int calc2(int n) {
   if (n == 1) {
@@ -82,7 +72,6 @@ int calc2(int n) {
         vst[cur] = true;
         cur = next[cur];
       }
-//      cout << "cnt = " << cnt << endl;
       res = lcm(res, cnt);
     }
   }
@@ -92,13 +81,11 @@ int calc2(int n) {
 int main() {
   int n;
   for (int i = 2; i <= 100; ++i) {
-    //if (calc(i) != calc2(i)) {
-   //   cout << "no" << endl;
-   //   return 1;
-   // }
-    cout << i << " " << calc2(i) << endl;
+    if (calc(i) != calc2(i)) {
+      cout << "no" << endl;
+      return 1;
+    }
   }
   cout << "yes" << endl;
   return 0;
 }
-
