@@ -6,18 +6,16 @@
 using namespace std;
 
 /**
- * Read-Write Lock
- * Reader has higher priority than writer. When a reader is reading,
- * other readers can also read. Writer need to wait all the readers
- * to finish reading before writing. And only one writer can modify
- * the buffer each time.
+ * Read-Write Lock (reader priority > writer priority)
+ * 1. Any number of readers may simultaneously read the file. 
+ * 2. Only one writer at a time may write to the file. 
+ * 3. If a writer is writing to the file, no reader may read it.
  */ 
 class RWLock {
 private:
     int readerCount_;
     mutex resourceLock_; // lock for the resource
     mutex readerCountLock_; // lock for the readerCount
-    mutex entryLock_;
 
 public:
     RWLock() : readerCount_(0) {}
@@ -39,13 +37,11 @@ public:
     }
 
     void writeLock() {
-        entryLock_.lock();
         resourceLock_.lock();
     }
 
     void writeUnLock() {
         resourceLock_.unlock();
-        entryLock_.unlock();
     }
 };
 

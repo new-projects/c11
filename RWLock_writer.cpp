@@ -6,8 +6,10 @@
 using namespace std;
 
 /**
- * Read-Write Lock
- * Reader Priority < Writer Priority.
+ * Read-Write Lock (reader priority < writer priority)
+ * 1. Any number of readers may simultaneously read the file. 
+ * 2. Only one writer at a time may write to the file. 
+ * 3. If a writer is writing to the file, no reader may read it. 
  */ 
 class RWLock {
 private:
@@ -92,13 +94,12 @@ void writer(int id) {
 
 int main() {
     vector<thread> threads;
-    // 100 writers
     for (int i = 0; i < 100; ++i) {
-        threads.push_back(thread(writer, i));
-    }
-    // 100 readers
-    for (int i = 0; i < 100; ++i) {
-        threads.push_back(thread(reader, i));
+        if (rand() % 2 == 0) {
+            threads.push_back(thread(writer, i));
+        } else {
+            threads.push_back(thread(reader, i));
+        }
     }
     for (auto& t : threads) {
         t.join();
