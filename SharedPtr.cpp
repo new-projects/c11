@@ -22,7 +22,7 @@ public:
   ~SharedPtr() {
     --(*count_);
     if (*count_ == 0) {
-      delete p_;
+      if (p_) delete p_;
       delete count_;
     }
   }
@@ -33,7 +33,7 @@ public:
     }
     --(*count_);
     if (*count_ == 0) {
-      delete p_;
+      if (p_) delete p_;
       delete count_;
     }
     p_ = other.p_;
@@ -57,6 +57,7 @@ public:
 int main() {
   SharedPtr<A> p1 = new A(1);
   SharedPtr<A> p2 = new A(2);
+  SharedPtr<A> p3 = nullptr;
   p1 = p2;
   cout << p1->value_ << endl;
   return 0;
