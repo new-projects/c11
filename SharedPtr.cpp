@@ -1,6 +1,26 @@
 #include <iostream>
 using namespace std;
 
+/**
+ * Reference Count Pointer.
+ * 
+ * Circle-reference is a special bad case for SharedPtr.
+ * 
+ * class A {
+ *  int value;
+ *  SharedPtr<B> ptr;
+ * };
+ *
+ * class B {
+ *  int value;
+ *  SharedPtr<A> ptr;
+ * };
+ *
+ * SharedPtr<A> pa = new A();
+ * SharedPtr<B> pb = new B();
+ * pa->ptr = pb;
+ * pb->ptr = pa;
+ */
 template <typename T> class SharedPtr {
 private:
   T *p_;
