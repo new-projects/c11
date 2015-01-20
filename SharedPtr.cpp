@@ -1,11 +1,11 @@
 #include <iostream>
 using namespace std;
 
-template <typename T>
-class SharedPtr {
+template <typename T> class SharedPtr {
 private:
-  T* p_;
-  int* count_;
+  T *p_;
+  int *count_;
+
 public:
   SharedPtr(T *p) {
     p_ = p;
@@ -13,7 +13,7 @@ public:
     ++(*count_);
   }
 
-  SharedPtr(const SharedPtr& other) {
+  SharedPtr(const SharedPtr &other) {
     p_ = other.p_;
     count_ = other.count_;
     ++(*count_);
@@ -26,8 +26,8 @@ public:
       delete count_;
     }
   }
-  
-  SharedPtr& operator=(const SharedPtr& other) {
+
+  SharedPtr &operator=(const SharedPtr &other) {
     if (this == &other || p_ == other.p_) {
       return *this;
     }
@@ -42,22 +42,16 @@ public:
     return *this;
   }
 
-  T& operator*() {
-    return *p_;
-  }
+  T &operator*() { return *p_; }
 
-  T* operator->() {
-    return p_;
-  }
+  T *operator->() { return p_; }
 };
 
 class A {
 public:
   int value_;
   A(int value) : value_(value) {}
-  ~A() {
-    cout << "destructor value = " << value_ << endl;
-  }
+  ~A() { cout << "destructor value = " << value_ << endl; }
 };
 
 int main() {
@@ -67,4 +61,3 @@ int main() {
   cout << p1->value_ << endl;
   return 0;
 }
-
