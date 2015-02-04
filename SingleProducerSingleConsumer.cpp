@@ -25,6 +25,8 @@ void produce(int item) {
     q.push(item);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     queueNotEmpty.notify_all();
+    std::cout << "start to notify all" << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 void consume() {
@@ -33,6 +35,7 @@ void consume() {
         // queue is empty
         std::cout << "Queue is empty" << std::endl;
         queueNotEmpty.wait(lock);
+        std::cout << "comsume is notified" << std::endl;
     }
     std::cout << "Consume item " << q.front() << std::endl;
     q.pop();
