@@ -264,19 +264,26 @@ public:
     }
   }
 
-  // Find an element from the tree. If not existes, NULL is returned.
-  Node *find(const int &key) const {
+  // Find an element from the tree. If not exists, NULL is returned.
+  Node *find(const int &key) {
     Node *x = root_;
+    Node *p = 0;
     while (x) {
+      p = x;
       if (x->key == key) {
-        return x;
+        break;
       } else if (x->key < key) {
         x = x->right;
       } else {
         x = x->left;
       }
     }
-    return 0;
+    if (x) {
+      splay(x);
+    } else if (p) {
+      splay(p);
+    }
+    return x;
   }
 
   // Remove an element from the tree.
@@ -293,7 +300,7 @@ public:
       }
       return;
     }
-    splay(x);
+    // find(key) already does splay(x), so no splay(x) is needed here.
     if (!x->left) {
       root_ = x->right;
       if (x->right)
@@ -326,7 +333,12 @@ public:
     }
   }
 
-  // Print the whole tree.
+  // Print the whole tree. The format looks like:
+  //      ___6__
+  //     /      \
+  //   _2       7
+  //  /  \
+  // 1   3
   void printTree() const { printPretty(root_, 1, 0, cout); }
 };
 
