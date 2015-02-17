@@ -264,7 +264,7 @@ public:
     }
   }
 
-  // Find an element from the tree. If not exists, NULL is returned.
+  // Search an element from the tree. If not exists, NULL is returned.
   Node *find(const int &key) {
     Node *x = root_;
     Node *p = 0;
