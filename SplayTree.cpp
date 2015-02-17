@@ -3,6 +3,12 @@
 #include <cstdlib>
 #include <set>
 #include <vector>
+#include <queue>
+#include <sstream>
+#include <string>
+#include <deque>
+#include <fstream>
+#include <iomanip>
 using namespace std;
 
 class SplayTree {
@@ -13,7 +19,7 @@ private:
     Node(int k = 0) : left(0), right(0), parent(0), key(k) {}
   };
 
-  // root_ node.
+  // the root node of the tree.
   Node *root_;
   // total number of tree nodes.
   size_t size_;
@@ -108,15 +114,7 @@ private:
     }
   }
 
-  void inOrderTraversal(Node *x) const {
-    if (!x) {
-      return;
-    }
-    inOrderTraversal(x->left);
-    cout << x->key << " ";
-    inOrderTraversal(x->right);
-  }
-
+  // Delete the whole subtree of node x recursively.
   void clear(Node *x) {
     if (x) {
       clear(x->left);
@@ -125,19 +123,124 @@ private:
     }
   }
 
+  // Find the maximum height of the binary tree
+  int maxHeight(Node *p) const {
+    if (!p)
+      return 0;
+    int leftHeight = maxHeight(p->left);
+    int rightHeight = maxHeight(p->right);
+    return (leftHeight > rightHeight) ? leftHeight + 1 : rightHeight + 1;
+  }
+
+  // Convert an integer value to string
+  string intToString(int val) const {
+    ostringstream ss;
+    ss << val;
+    return ss.str();
+  }
+
+  // Print the arm branches (eg, /    \ ) on a line
+  void printBranches(int branchLen, int nodeSpaceLen, int startLen,
+                     int nodesInThisLevel, const deque<Node *> &nodesQueue,
+                     ostream &out) const {
+    deque<Node *>::const_iterator iter = nodesQueue.begin();
+    for (int i = 0; i < nodesInThisLevel / 2; i++) {
+      out << ((i == 0) ? setw(startLen - 1) : setw(nodeSpaceLen - 2)) << ""
+          << ((*iter++) ? "/" : " ");
+      out << setw(2 * branchLen + 2) << "" << ((*iter++) ? "\\" : " ");
+    }
+    out << endl;
+  }
+
+  // Print the branches and node (eg, ___10___ )
+  void printNodes(int branchLen, int nodeSpaceLen, int startLen,
+                  int nodesInThisLevel, const deque<Node *> &nodesQueue,
+                  ostream &out) const {
+    deque<Node *>::const_iterator iter = nodesQueue.begin();
+    for (int i = 0; i < nodesInThisLevel; i++, iter++) {
+      out << ((i == 0) ? setw(startLen) : setw(nodeSpaceLen)) << ""
+          << ((*iter && (*iter)->left) ? setfill('_') : setfill(' '));
+      out << setw(branchLen + 2) << ((*iter) ? intToString((*iter)->key) : "");
+      out << ((*iter && (*iter)->right) ? setfill('_') : setfill(' '))
+          << setw(branchLen) << "" << setfill(' ');
+    }
+    out << endl;
+  }
+
+  // Print the leaves only (just for the bottom row)
+  void printLeaves(int indentSpace, int level, int nodesInThisLevel,
+                   const deque<Node *> &nodesQueue, ostream &out) const {
+    deque<Node *>::const_iterator iter = nodesQueue.begin();
+    for (int i = 0; i < nodesInThisLevel; i++, iter++) {
+      out << ((i == 0) ? setw(indentSpace + 2) : setw(2 * level + 2))
+          << ((*iter) ? intToString((*iter)->key) : "");
+    }
+    out << endl;
+  }
+
+  // Pretty formatting of a binary tree to the output stream
+  void printPretty(Node *root, int level, int indentSpace, ostream &out) const {
+    int h = maxHeight(root);
+    int nodesInThisLevel = 1;
+
+    int branchLen = 2 * ((1 << h) - 1) - (3 - level) * (1 << (h - 1));
+    int nodeSpaceLen = 2 + (level + 1) * (1 << h);
+    int startLen = branchLen + (3 - level) + indentSpace;
+    deque<Node *> nodesQueue;
+    nodesQueue.push_back(root);
+    for (int r = 1; r < h; r++) {
+      printBranches(branchLen, nodeSpaceLen, startLen, nodesInThisLevel,
+                    nodesQueue, out);
+      branchLen = branchLen / 2 - 1;
+      nodeSpaceLen = nodeSpaceLen / 2 + 1;
+      startLen = branchLen + (3 - level) + indentSpace;
+      printNodes(branchLen, nodeSpaceLen, startLen, nodesInThisLevel,
+                 nodesQueue, out);
+
+      for (int i = 0; i < nodesInThisLevel; i++) {
+        Node *currNode = nodesQueue.front();
+        nodesQueue.pop_front();
+        if (currNode) {
+          nodesQueue.push_back(currNode->left);
+          nodesQueue.push_back(currNode->right);
+        } else {
+          nodesQueue.push_back(NULL);
+          nodesQueue.push_back(NULL);
+        }
+      }
+      nodesInThisLevel *= 2;
+    }
+    printBranches(branchLen, nodeSpaceLen, startLen, nodesInThisLevel,
+                  nodesQueue, out);
+    printLeaves(indentSpace, level, nodesInThisLevel, nodesQueue, out);
+    cout << endl;
+  }
+
 public:
+  // Constructor
   SplayTree() : root_(0), size_(0) {}
 
+  // Destructor
   ~SplayTree() { clear(root_); }
 
+  // Return the total number of nodes in the tree.
   size_t size() const { return size_; }
 
-  void insert(const int &key) {
+  // Insert an element from the tree.
+  //
+  // @param key: the element that will be added.
+  // @param print: print out the whole tree after insert is complete if print is
+  // set to true.
+  void insert(const int &key, bool print = false) {
+    cout << "insert " << key << ":" << endl;
     Node *x = root_;
     Node *p = 0;
     while (x) {
       p = x;
       if (x->key == key) {
+        if (print) {
+          printTree();
+        }
         return;
       } else if (x->key < key) {
         x = x->right;
@@ -156,8 +259,12 @@ public:
     }
     splay(x);
     ++size_;
+    if (print) {
+      printTree();
+    }
   }
 
+  // Find an element from the tree. If not existes, NULL is returned.
   Node *find(const int &key) const {
     Node *x = root_;
     while (x) {
@@ -172,9 +279,18 @@ public:
     return 0;
   }
 
-  void remove(const int &key) {
+  // Remove an element from the tree.
+  //
+  // @param key: the element that will be deleted.
+  // @param print: print out the whole tree after remove is complete if print is
+  // set to true.
+  void remove(const int &key, bool print = false) {
+    cout << "remove " << key << ":" << endl;
     Node *x = find(key);
     if (!x) {
+      if (print) {
+        printTree();
+      }
       return;
     }
     splay(x);
@@ -205,58 +321,24 @@ public:
     }
     delete x;
     --size_;
-  }
-
-  void inOrderTraversal() const {
-    inOrderTraversal(root_);
-    cout << endl;
-  }
-
-  int getHeight(Node *x) {
-    if (!x) return 0;
-    return max(getHeight(x->left), getHeight(x->right)) + 1;
-  }
-
-  void printTree() {
-    int h = getHeight(root_);
-    if (h == 0) return;
-    vector<string> s(h + 1, string(' ', 1 << (h + 1)));
-    printTree(root_, 0, s, 1 << h);
-    for (int i = 0; i <= h; ++i) {
-      cout << s[i] << endl;
+    if (print) {
+      printTree();
     }
   }
 
-  void printTree(Node *x, int depth, vector<string>& s, int start) {
-    if (!x) return;
-    s[depth][start] = static_cast<char>(x->key + '0');
-    int h = getHeight(x);
-    if (x->left) {
-      int k = 1 << (h - 1);
-      for (int i = 0; i < k; ++i) {
-        s[depth][start - i - 1] = '-';
-      }
-      printTree(x->left, depth + 1, s, start - k);
-    }
-    if (x->right) {
-      int k = 1 << (h - 1);
-      for (int i = 0; i < k; ++i) {
-        s[depth][start + i + 1] = '-';
-      }
-      printTree(x->right, depth + 1, s, start + k);
-    }
-  }
-
+  // Print the whole tree.
+  void printTree() const { printPretty(root_, 1, 0, cout); }
 };
 
 int main() {
   SplayTree st;
   vector<int> a;
-  int n = 1000000;
   set<int> marked;
+  int n = 7;
 
-/*  for (int i = 0; i < n; ++i) {
-    int t = rand();
+  for (int i = 0; i < n; ++i) {
+    int t = rand() % n + 1;
+    // remove duplicate elements.
     if (marked.count(t)) {
       --i;
       continue;
@@ -265,19 +347,10 @@ int main() {
     a.push_back(t);
   }
   for (int i = 0; i < n; ++i) {
-    st.insert(a[i]);
+    st.insert(a[i], true /*print*/);
   }
-  cout << "size = " << st.size() << endl;
   for (int i = 0; i < n; ++i) {
-    st.remove(a[i]);
+    st.remove(a[i], true /*print*/);
   }
-  cout << "size = " << st.size() << endl;
-  st.inOrderTraversal();*/
-  st.insert(1);
-  st.printTree();
-  st.insert(2);
-  st.printTree();
-  st.insert(3);
-  st.printTree();
   return 0;
 }
